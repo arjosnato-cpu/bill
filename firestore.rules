@@ -1,0 +1,247 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Diagnostics / connection health test
+    match /test/{testId} {
+      allow get: if true;
+    }
+
+    // Business Profile
+    function isValidProfile(data) {
+      return data.userId == request.auth.uid
+        && data.businessName is string && data.businessName.size() > 0 && data.businessName.size() <= 200
+        && (!('tagline' in data) || (data.tagline is string && data.tagline.size() <= 500))
+        && (!('ownerName' in data) || (data.ownerName is string && data.ownerName.size() <= 200))
+        && (!('gstNumber' in data) || (data.gstNumber is string && data.gstNumber.size() <= 30))
+        && (!('pan' in data) || (data.pan is string && data.pan.size() <= 30))
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 100))
+        && (!('whatsappNumber' in data) || (data.whatsappNumber is string && data.whatsappNumber.size() <= 30))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 200))
+        && (!('address' in data) || (data.address is string && data.address.size() <= 1000))
+        && (!('city' in data) || (data.city is string && data.city.size() <= 200))
+        && (!('state' in data) || (data.state is string && data.state.size() <= 200))
+        && (!('stateCode' in data) || (data.stateCode is string && data.stateCode.size() <= 10))
+        && (!('pincode' in data) || (data.pincode is string && data.pincode.size() <= 30))
+        && (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() <= 500000))
+        && (!('authorizedSignatoryTitle' in data) || (data.authorizedSignatoryTitle is string && data.authorizedSignatoryTitle.size() <= 200))
+        && (!('bankDetails' in data) || data.bankDetails is map)
+        && (!('termsAndConditions' in data) || (data.termsAndConditions is string && data.termsAndConditions.size() <= 3000))
+        && (!('invoiceNote' in data) || (data.invoiceNote is string && data.invoiceNote.size() <= 2000))
+        && (!('currencySymbol' in data) || (data.currencySymbol is string && data.currencySymbol.size() <= 10))
+        && (!('defaultTaxRate' in data) || data.defaultTaxRate is number)
+        && (!('invoicePrefix' in data) || (data.invoicePrefix is string && data.invoicePrefix.size() <= 30))
+        && (!('challanPrefix' in data) || (data.challanPrefix is string && data.challanPrefix.size() <= 30))
+        && (!('quotePrefix' in data) || (data.quotePrefix is string && data.quotePrefix.size() <= 30))
+        && (!('invoiceTheme' in data) || (data.invoiceTheme is string && data.invoiceTheme.size() <= 50))
+        && (!('printLayout' in data) || (data.printLayout is string && data.printLayout.size() <= 50));
+    }
+
+    match /profiles/{profileId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(profileId) && (profileId == request.auth.uid || (resource != null && resource.data.userId == request.auth.uid));
+      allow create: if isSignedIn() && isValidId(profileId) && profileId == request.auth.uid && incoming().userId == request.auth.uid && isValidProfile(incoming());
+      allow update: if isSignedIn() && isValidId(profileId) && profileId == request.auth.uid && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidProfile(incoming());
+      allow delete: if isSignedIn() && isValidId(profileId) && profileId == request.auth.uid;
+    }
+
+    // Invoices, Challans & Quotations
+    function isValidDocument(data) {
+      return data.userId == request.auth.uid
+        && data.docNumber is string && data.docNumber.size() > 0 && data.docNumber.size() <= 100
+        && data.docType is string && data.docType.size() <= 40
+        && data.docDate is string && data.docDate.size() <= 30
+        && data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 200
+        && data.items is list && data.items.size() <= 200
+        && data.grandTotal is number
+        && (!('poNumber' in data) || (data.poNumber is string && data.poNumber.size() <= 100))
+        && (!('poDate' in data) || (data.poDate is string && data.poDate.size() <= 30))
+        && (!('eWayBillNo' in data) || (data.eWayBillNo is string && data.eWayBillNo.size() <= 50))
+        && (!('isB2B' in data) || data.isB2B is bool)
+        && (!('customerId' in data) || (data.customerId is string && data.customerId.size() <= 128))
+        && (!('customerPhone' in data) || (data.customerPhone is string && data.customerPhone.size() <= 50))
+        && (!('customerEmail' in data) || (data.customerEmail is string && data.customerEmail.size() <= 150))
+        && (!('customerGstin' in data) || (data.customerGstin is string && data.customerGstin.size() <= 20))
+        && (!('customerBillingAddress' in data) || (data.customerBillingAddress is string && data.customerBillingAddress.size() <= 500))
+        && (!('customerShippingAddress' in data) || (data.customerShippingAddress is string && data.customerShippingAddress.size() <= 500))
+        && (!('placeOfSupply' in data) || (data.placeOfSupply is string && data.placeOfSupply.size() <= 100))
+        && (!('vehicleNo' in data) || (data.vehicleNo is string && data.vehicleNo.size() <= 50))
+        && (!('transportMode' in data) || (data.transportMode is string && data.transportMode.size() <= 50))
+        && (!('challanPurpose' in data) || (data.challanPurpose is string && data.challanPurpose.size() <= 100))
+        && (!('quotationValidity' in data) || (data.quotationValidity is string && data.quotationValidity.size() <= 50))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        && (!('terms' in data) || (data.terms is string && data.terms.size() <= 1500))
+        && (!('status' in data) || (data.status is string && data.status.size() <= 30));
+    }
+
+    match /documents/{documentId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(documentId) && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(documentId) && incoming().userId == request.auth.uid && isValidDocument(incoming());
+      allow update: if isSignedIn() && isValidId(documentId) && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidDocument(incoming());
+      allow delete: if isSignedIn() && isValidId(documentId) && existing().userId == request.auth.uid;
+    }
+
+    // Customers
+    function isValidCustomer(data) {
+      return data.userId == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && (!('companyName' in data) || (data.companyName is string && data.companyName.size() <= 200))
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 150))
+        && (!('gstin' in data) || (data.gstin is string && data.gstin.size() <= 20))
+        && (!('billingAddress' in data) || (data.billingAddress is string && data.billingAddress.size() <= 500))
+        && (!('shippingAddress' in data) || (data.shippingAddress is string && data.shippingAddress.size() <= 500))
+        && (!('state' in data) || (data.state is string && data.state.size() <= 100))
+        && (!('stateCode' in data) || (data.stateCode is string && data.stateCode.size() <= 5))
+        && (!('pincode' in data) || (data.pincode is string && data.pincode.size() <= 15))
+        && (!('openingBalance' in data) || data.openingBalance is number)
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000));
+    }
+
+    match /customers/{customerId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(customerId) && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(customerId) && incoming().userId == request.auth.uid && isValidCustomer(incoming());
+      allow update: if isSignedIn() && isValidId(customerId) && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidCustomer(incoming());
+      allow delete: if isSignedIn() && isValidId(customerId) && existing().userId == request.auth.uid;
+    }
+
+    // Suppliers
+    function isValidSupplier(data) {
+      return data.userId == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && (!('companyName' in data) || (data.companyName is string && data.companyName.size() <= 200))
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 150))
+        && (!('gstin' in data) || (data.gstin is string && data.gstin.size() <= 20))
+        && (!('address' in data) || (data.address is string && data.address.size() <= 500))
+        && (!('state' in data) || (data.state is string && data.state.size() <= 100))
+        && (!('stateCode' in data) || (data.stateCode is string && data.stateCode.size() <= 5))
+        && (!('pincode' in data) || (data.pincode is string && data.pincode.size() <= 15))
+        && (!('bankDetails' in data) || data.bankDetails is map)
+        && (!('openingBalance' in data) || data.openingBalance is number)
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000));
+    }
+
+    match /suppliers/{supplierId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(supplierId) && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(supplierId) && incoming().userId == request.auth.uid && isValidSupplier(incoming());
+      allow update: if isSignedIn() && isValidId(supplierId) && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidSupplier(incoming());
+      allow delete: if isSignedIn() && isValidId(supplierId) && existing().userId == request.auth.uid;
+    }
+
+    // Purchases
+    function isValidPurchase(data) {
+      return data.userId == request.auth.uid
+        && data.billNumber is string && data.billNumber.size() > 0 && data.billNumber.size() <= 100
+        && data.supplierName is string && data.supplierName.size() > 0 && data.supplierName.size() <= 200
+        && data.grandTotal is number
+        && (!('supplierId' in data) || (data.supplierId is string && data.supplierId.size() <= 128))
+        && (!('billDate' in data) || (data.billDate is string && data.billDate.size() <= 30))
+        && (!('itemsSummary' in data) || (data.itemsSummary is string && data.itemsSummary.size() <= 500))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000));
+    }
+
+    match /purchases/{purchaseId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(purchaseId) && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(purchaseId) && incoming().userId == request.auth.uid && isValidPurchase(incoming());
+      allow update: if isSignedIn() && isValidId(purchaseId) && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidPurchase(incoming());
+      allow delete: if isSignedIn() && isValidId(purchaseId) && existing().userId == request.auth.uid;
+    }
+
+    // Products / Inventory
+    function isValidProduct(data) {
+      return data.userId == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 250
+        && data.salePrice is number
+        && (!('sku' in data) || (data.sku is string && data.sku.size() <= 100))
+        && (!('hsnSacCode' in data) || (data.hsnSacCode is string && data.hsnSacCode.size() <= 20))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 100))
+        && (!('unit' in data) || (data.unit is string && data.unit.size() <= 30))
+        && (!('purchaseCost' in data) || data.purchaseCost is number)
+        && (!('taxRate' in data) || data.taxRate is number)
+        && (!('currentStock' in data) || data.currentStock is number)
+        && (!('lowStockThreshold' in data) || data.lowStockThreshold is number)
+        && (!('description' in data) || (data.description is string && data.description.size() <= 1000));
+    }
+
+    match /products/{productId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(productId) && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(productId) && incoming().userId == request.auth.uid && isValidProduct(incoming());
+      allow update: if isSignedIn() && isValidId(productId) && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidProduct(incoming());
+      allow delete: if isSignedIn() && isValidId(productId) && existing().userId == request.auth.uid;
+    }
+
+    // Operating Expenses
+    function isValidExpense(data) {
+      return data.userId == request.auth.uid
+        && data.description is string && data.description.size() > 0 && data.description.size() <= 500
+        && data.amount is number
+        && (!('expenseNumber' in data) || (data.expenseNumber is string && data.expenseNumber.size() <= 100))
+        && (!('date' in data) || (data.date is string && data.date.size() <= 30))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 100))
+        && (!('paymentMode' in data) || (data.paymentMode is string && data.paymentMode.size() <= 40))
+        && (!('receiptNo' in data) || (data.receiptNo is string && data.receiptNo.size() <= 100))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000));
+    }
+
+    match /expenses/{expenseId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(expenseId) && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(expenseId) && incoming().userId == request.auth.uid && isValidExpense(incoming());
+      allow update: if isSignedIn() && isValidId(expenseId) && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidExpense(incoming());
+      allow delete: if isSignedIn() && isValidId(expenseId) && existing().userId == request.auth.uid;
+    }
+
+    // Payments In/Out
+    function isValidPayment(data) {
+      return data.userId == request.auth.uid
+        && data.entityName is string && data.entityName.size() > 0 && data.entityName.size() <= 200
+        && data.amount is number
+        && data.type is string && (data.type == 'in' || data.type == 'out')
+        && (!('date' in data) || (data.date is string && data.date.size() <= 30))
+        && (!('entityType' in data) || (data.entityType is string && data.entityType.size() <= 30))
+        && (!('entityId' in data) || (data.entityId is string && data.entityId.size() <= 128))
+        && (!('docId' in data) || (data.docId is string && data.docId.size() <= 128))
+        && (!('docNumber' in data) || (data.docNumber is string && data.docNumber.size() <= 100))
+        && (!('paymentMode' in data) || (data.paymentMode is string && data.paymentMode.size() <= 40))
+        && (!('referenceNo' in data) || (data.referenceNo is string && data.referenceNo.size() <= 100))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000));
+    }
+
+    match /payments/{paymentId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && isValidId(paymentId) && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(paymentId) && incoming().userId == request.auth.uid && isValidPayment(incoming());
+      allow update: if isSignedIn() && isValidId(paymentId) && incoming().userId == request.auth.uid && incoming().userId == existing().userId && isValidPayment(incoming());
+      allow delete: if isSignedIn() && isValidId(paymentId) && existing().userId == request.auth.uid;
+    }
+  }
+}

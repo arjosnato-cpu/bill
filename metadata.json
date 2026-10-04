@@ -1,0 +1,6 @@
+{
+  "name": "VyaparFlow - GST Billing, Challan & Business Accounting",
+  "description": "Comprehensive GST & Non-GST digital invoicing, delivery challans, quotation maker, customer & supplier ledger, inventory management, and business accounting with WhatsApp sharing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

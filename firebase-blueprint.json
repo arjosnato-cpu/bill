@@ -1,0 +1,253 @@
+{
+  "entities": {
+    "BusinessProfile": {
+      "title": "BusinessProfile",
+      "description": "User business identity, GST registration, bank account, and invoice configuration.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "businessName": { "type": "string", "maxLength": 200, "description": "Trade or enterprise name" },
+        "tagline": { "type": "string", "maxLength": 300, "description": "Business tagline or description" },
+        "ownerName": { "type": "string", "maxLength": 150, "description": "Proprietor or partner name" },
+        "gstNumber": { "type": "string", "maxLength": 20, "description": "15-digit GSTIN" },
+        "pan": { "type": "string", "maxLength": 15, "description": "10-character PAN" },
+        "phone": { "type": "string", "maxLength": 60, "description": "Primary phone numbers" },
+        "whatsappNumber": { "type": "string", "maxLength": 20, "description": "WhatsApp share number" },
+        "email": { "type": "string", "maxLength": 150, "description": "Official business email" },
+        "address": { "type": "string", "maxLength": 500, "description": "Street and locality address" },
+        "city": { "type": "string", "maxLength": 100, "description": "City or district name" },
+        "state": { "type": "string", "maxLength": 100, "description": "State name" },
+        "stateCode": { "type": "string", "maxLength": 5, "description": "2-digit GST state code" },
+        "pincode": { "type": "string", "maxLength": 15, "description": "Postal PIN code" },
+        "logoUrl": { "type": "string", "maxLength": 2000, "description": "Optional business logo URL" },
+        "authorizedSignatoryTitle": { "type": "string", "maxLength": 100, "description": "Signatory title" },
+        "bankName": { "type": "string", "maxLength": 150, "description": "Bank name" },
+        "accountNo": { "type": "string", "maxLength": 50, "description": "Bank account number" },
+        "ifscCode": { "type": "string", "maxLength": 20, "description": "Bank IFSC code" },
+        "branch": { "type": "string", "maxLength": 150, "description": "Branch name and address" },
+        "upiId": { "type": "string", "maxLength": 100, "description": "UPI VPA address" },
+        "termsAndConditions": { "type": "string", "maxLength": 2000, "description": "Invoice terms and conditions" },
+        "invoiceNote": { "type": "string", "maxLength": 1000, "description": "Invoice footer note" },
+        "currencySymbol": { "type": "string", "maxLength": 10, "description": "Currency symbol like ₹" },
+        "defaultTaxRate": { "type": "number", "description": "Default GST rate percent" },
+        "invoicePrefix": { "type": "string", "maxLength": 20, "description": "Invoice numbering prefix" },
+        "challanPrefix": { "type": "string", "maxLength": 20, "description": "Challan numbering prefix" },
+        "quotePrefix": { "type": "string", "maxLength": 20, "description": "Quotation numbering prefix" },
+        "invoiceTheme": { "type": "string", "maxLength": 30, "description": "Visual theme name" },
+        "printLayout": { "type": "string", "maxLength": 30, "description": "Print format a4 or thermal" },
+        "updatedAt": { "type": "string", "maxLength": 50, "description": "ISO timestamp" }
+      },
+      "required": ["userId", "businessName"]
+    },
+    "DocumentRecord": {
+      "title": "DocumentRecord",
+      "description": "GST tax invoices, delivery challans, bills of supply, and quotations.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "docNumber": { "type": "string", "maxLength": 100, "description": "Invoice / Challan number" },
+        "docType": { "type": "string", "maxLength": 40, "description": "Document type" },
+        "docDate": { "type": "string", "maxLength": 30, "description": "Document date YYYY-MM-DD" },
+        "poNumber": { "type": "string", "maxLength": 100, "description": "Buyer purchase order reference" },
+        "poDate": { "type": "string", "maxLength": 30, "description": "PO date" },
+        "eWayBillNo": { "type": "string", "maxLength": 50, "description": "E-Way bill number" },
+        "isB2B": { "type": "boolean", "description": "Whether document is B2B with GSTIN" },
+        "customerId": { "type": "string", "maxLength": 128, "description": "Linked customer ID" },
+        "customerName": { "type": "string", "maxLength": 200, "description": "Customer name" },
+        "customerPhone": { "type": "string", "maxLength": 50, "description": "Customer contact" },
+        "customerEmail": { "type": "string", "maxLength": 150, "description": "Customer email" },
+        "customerGstin": { "type": "string", "maxLength": 20, "description": "Customer GSTIN" },
+        "customerBillingAddress": { "type": "string", "maxLength": 500, "description": "Billing address" },
+        "customerShippingAddress": { "type": "string", "maxLength": 500, "description": "Shipping address" },
+        "placeOfSupply": { "type": "string", "maxLength": 100, "description": "Place of supply state" },
+        "isInterState": { "type": "boolean", "description": "True for IGST, false for CGST+SGST" },
+        "reverseCharge": { "type": "boolean", "description": "Reverse charge applicability" },
+        "vehicleNo": { "type": "string", "maxLength": 50, "description": "Transport vehicle number" },
+        "transportMode": { "type": "string", "maxLength": 50, "description": "Road, rail, air" },
+        "challanPurpose": { "type": "string", "maxLength": 100, "description": "Challan dispatch purpose" },
+        "quotationValidity": { "type": "string", "maxLength": 50, "description": "Quote validity date" },
+        "convertedToDocId": { "type": "string", "maxLength": 128, "description": "Converted invoice doc ID" },
+        "subtotal": { "type": "number", "description": "Item subtotal before taxes" },
+        "totalDiscount": { "type": "number", "description": "Total discount amount" },
+        "totalTaxable": { "type": "number", "description": "Total taxable value" },
+        "cgstTotal": { "type": "number", "description": "Central GST total" },
+        "sgstTotal": { "type": "number", "description": "State GST total" },
+        "igstTotal": { "type": "number", "description": "Integrated GST total" },
+        "totalTax": { "type": "number", "description": "Total tax amount" },
+        "roundOff": { "type": "number", "description": "Round off adjustment" },
+        "grandTotal": { "type": "number", "description": "Final payable grand total" },
+        "paidAmount": { "type": "number", "description": "Amount already received" },
+        "balanceDue": { "type": "number", "description": "Remaining unpaid balance" },
+        "paymentMode": { "type": "string", "maxLength": 40, "description": "Payment mode" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Document notes" },
+        "terms": { "type": "string", "maxLength": 1500, "description": "Document specific terms" },
+        "status": { "type": "string", "maxLength": 30, "description": "Document status paid, unpaid, etc" },
+        "createdAt": { "type": "string", "maxLength": 50, "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "maxLength": 50, "description": "Update timestamp" }
+      },
+      "required": ["userId", "docNumber", "docType", "docDate", "customerName", "grandTotal"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer master record with GST and balance ledger.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "name": { "type": "string", "maxLength": 200, "description": "Contact person name" },
+        "companyName": { "type": "string", "maxLength": 200, "description": "Company trade name" },
+        "phone": { "type": "string", "maxLength": 50, "description": "Phone number" },
+        "email": { "type": "string", "maxLength": 150, "description": "Email address" },
+        "gstin": { "type": "string", "maxLength": 20, "description": "Customer GSTIN" },
+        "billingAddress": { "type": "string", "maxLength": 500, "description": "Billing address" },
+        "shippingAddress": { "type": "string", "maxLength": 500, "description": "Shipping address" },
+        "state": { "type": "string", "maxLength": 100, "description": "State name" },
+        "stateCode": { "type": "string", "maxLength": 5, "description": "State code" },
+        "pincode": { "type": "string", "maxLength": 15, "description": "Postal PIN code" },
+        "openingBalance": { "type": "number", "description": "Opening receivable balance" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Customer remarks" },
+        "createdAt": { "type": "string", "maxLength": 50, "description": "Creation date" }
+      },
+      "required": ["userId", "name"]
+    },
+    "Supplier": {
+      "title": "Supplier",
+      "description": "Supplier directory record with GST and bank account details.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "name": { "type": "string", "maxLength": 200, "description": "Supplier contact name" },
+        "companyName": { "type": "string", "maxLength": 200, "description": "Supplier trade name" },
+        "phone": { "type": "string", "maxLength": 50, "description": "Phone number" },
+        "email": { "type": "string", "maxLength": 150, "description": "Email address" },
+        "gstin": { "type": "string", "maxLength": 20, "description": "Supplier GSTIN" },
+        "address": { "type": "string", "maxLength": 500, "description": "Supplier address" },
+        "state": { "type": "string", "maxLength": 100, "description": "State name" },
+        "stateCode": { "type": "string", "maxLength": 5, "description": "State code" },
+        "pincode": { "type": "string", "maxLength": 15, "description": "Postal PIN code" },
+        "bankName": { "type": "string", "maxLength": 150, "description": "Bank name" },
+        "accountNo": { "type": "string", "maxLength": 50, "description": "Account number" },
+        "ifscCode": { "type": "string", "maxLength": 20, "description": "IFSC code" },
+        "openingBalance": { "type": "number", "description": "Opening payable balance" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Notes" },
+        "createdAt": { "type": "string", "maxLength": 50, "description": "Creation timestamp" }
+      },
+      "required": ["userId", "name"]
+    },
+    "PurchaseRecord": {
+      "title": "PurchaseRecord",
+      "description": "Inward purchase bills from suppliers with ITC tax tracking.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "billNumber": { "type": "string", "maxLength": 100, "description": "Vendor bill invoice number" },
+        "supplierId": { "type": "string", "maxLength": 128, "description": "Supplier reference ID" },
+        "supplierName": { "type": "string", "maxLength": 200, "description": "Supplier trade name" },
+        "billDate": { "type": "string", "maxLength": 30, "description": "Purchase date YYYY-MM-DD" },
+        "itemsSummary": { "type": "string", "maxLength": 500, "description": "Short description of items" },
+        "taxableAmount": { "type": "number", "description": "Taxable purchase amount" },
+        "gstAmount": { "type": "number", "description": "GST amount" },
+        "grandTotal": { "type": "number", "description": "Total purchase bill amount" },
+        "paidAmount": { "type": "number", "description": "Amount paid to supplier" },
+        "balanceDue": { "type": "number", "description": "Balance amount payable" },
+        "paymentMode": { "type": "string", "maxLength": 40, "description": "Payment mode" },
+        "inputTaxCreditEligible": { "type": "boolean", "description": "Whether eligible for ITC in GSTR-3B" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Purchase notes" },
+        "createdAt": { "type": "string", "maxLength": 50, "description": "Creation timestamp" }
+      },
+      "required": ["userId", "billNumber", "supplierName", "grandTotal"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Product catalog and inventory stock record.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "name": { "type": "string", "maxLength": 250, "description": "Product / Service title" },
+        "sku": { "type": "string", "maxLength": 100, "description": "SKU or item code" },
+        "hsnSacCode": { "type": "string", "maxLength": 20, "description": "HSN or SAC code" },
+        "category": { "type": "string", "maxLength": 100, "description": "Item category" },
+        "unit": { "type": "string", "maxLength": 30, "description": "Unit of measurement (Pcs, Kg, Nos, etc.)" },
+        "salePrice": { "type": "number", "description": "Selling price per unit" },
+        "purchaseCost": { "type": "number", "description": "Purchase cost per unit" },
+        "taxRate": { "type": "number", "description": "GST rate percent (0, 5, 12, 18, 28)" },
+        "currentStock": { "type": "number", "description": "Current on-hand inventory count" },
+        "lowStockThreshold": { "type": "number", "description": "Low stock alert trigger quantity" },
+        "description": { "type": "string", "maxLength": 1000, "description": "Detailed specifications" }
+      },
+      "required": ["userId", "name", "salePrice"]
+    },
+    "ExpenseRecord": {
+      "title": "ExpenseRecord",
+      "description": "Operating business expenses journal.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "expenseNumber": { "type": "string", "maxLength": 100, "description": "Voucher or serial number" },
+        "date": { "type": "string", "maxLength": 30, "description": "Expense date YYYY-MM-DD" },
+        "category": { "type": "string", "maxLength": 100, "description": "Expense category" },
+        "description": { "type": "string", "maxLength": 500, "description": "Expense description" },
+        "amount": { "type": "number", "description": "Total expense amount" },
+        "paymentMode": { "type": "string", "maxLength": 40, "description": "Payment mode" },
+        "receiptNo": { "type": "string", "maxLength": 100, "description": "Receipt reference" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Expense notes" },
+        "createdAt": { "type": "string", "maxLength": 50, "description": "Creation timestamp" }
+      },
+      "required": ["userId", "description", "amount"]
+    },
+    "PaymentTransaction": {
+      "title": "PaymentTransaction",
+      "description": "Customer cash receipts and supplier payment transactions.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "description": "Owner user UID" },
+        "date": { "type": "string", "maxLength": 30, "description": "Transaction date YYYY-MM-DD" },
+        "entityType": { "type": "string", "maxLength": 30, "description": "customer or supplier" },
+        "entityId": { "type": "string", "maxLength": 128, "description": "Linked customer or supplier ID" },
+        "entityName": { "type": "string", "maxLength": 200, "description": "Entity name" },
+        "docId": { "type": "string", "maxLength": 128, "description": "Optional invoice ID" },
+        "docNumber": { "type": "string", "maxLength": 100, "description": "Optional invoice number" },
+        "amount": { "type": "number", "description": "Payment transaction amount" },
+        "type": { "type": "string", "maxLength": 20, "description": "in or out" },
+        "paymentMode": { "type": "string", "maxLength": 40, "description": "Cash, UPI, NEFT, Cheque" },
+        "referenceNo": { "type": "string", "maxLength": 100, "description": "UTR, Cheque number or UPI ref" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Transaction notes" },
+        "createdAt": { "type": "string", "maxLength": 50, "description": "Creation timestamp" }
+      },
+      "required": ["userId", "entityName", "amount", "type"]
+    }
+  },
+  "firestore": {
+    "/profiles/{profileId}": {
+      "schema": "BusinessProfile",
+      "description": "User business identity, GST, and bank configuration."
+    },
+    "/documents/{documentId}": {
+      "schema": "DocumentRecord",
+      "description": "GST invoices, delivery challans, bills of supply, and quotations."
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Customer master records and ledger accounts."
+    },
+    "/suppliers/{supplierId}": {
+      "schema": "Supplier",
+      "description": "Vendor directory with GSTIN and bank details."
+    },
+    "/purchases/{purchaseId}": {
+      "schema": "PurchaseRecord",
+      "description": "Inward purchase bills from suppliers."
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Product catalog and inventory stock tracking."
+    },
+    "/expenses/{expenseId}": {
+      "schema": "ExpenseRecord",
+      "description": "Operating business expenses journal."
+    },
+    "/payments/{paymentId}": {
+      "schema": "PaymentTransaction",
+      "description": "Customer payments received and vendor payments made."
+    }
+  }
+}
